@@ -1,0 +1,971 @@
+---
+title: "Proyecto final DDS R y Python"
+subtitle: "Proyeccion del precio de la carne en el mercado ganadero Uruguayo para el periodo 2022-2025"
+author: "Maria de los Angeles Gomez"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: True
+    toc_float: True
+    theme:
+      bootswatch: minty
+    highlight: tango
+---
+
+<center>
+
+![](C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/Logo%20del%20instituto.png){width="200"}
+
+</center>
+
+## Resumen {.tabset .tabset-pills .smaller}
+
+El proyecto de la Diplomatura de Data Science con R y Python forma parte de los recaudos para la finalización del curso. Este proyecto esta desarrollado en Rmardown con ambos lenguajes de programación R y Python, la necesidad planteada surge a partir de la importancia en la República Oriental del Uruguay de las inversiones en el negocio ganadero, constituyendo hoy en día alternativa de ahorro e inversión tanto para el empresario como para el ciudadano común con o sin conocimiento en el mercado. Para la el proyecto exploramos con **R** y **Python** varios algoritmos de regresión, para posteriormente comparar sus resultados y tomar el de menor desvío como el óptimo para la proyeccción.
+
+> Metodología
+
+El proyecto se realizó con los lenguajes de programación R y Python, en el siguiente orden:
+
+1.  Análisis y compresión del problema.
+2.  Construcción y obtención de datos de fuentes oficiales.
+3.  Exploración de datos.
+4.  Limpieza y preparación del Dataset.
+5.  Exploración de algoritmos.
+6.  Registro de resultados - Predicciones 2022-2025
+7.  Interpretación y conclusiones.
+8.  Presentación de resultados.
+
+## Ficha técnica {.tabset .tabset-pills .smaller}
+
+### Análisis y compresión del problema
+
+Un productor del departamento de Colonia nos ha contactado para saber si le conviene invertir en ganado para cría y engorde, con proyección de venta al 2.025, considerando la baja que se registra desde el 2.022 en las exportaciones al mercado Chino, principal destino de las exportaciones de ganado en la actualidad. La otra alternativa de inversion para el productor es colocar el dinero a plazo fijo por cinco años que le promete un retorno del 8% anual.
+
+Para ello hemos planteado hacer una proyección del precio promedio de exportacion por kilo que nos permita inferir las ventas y el retorno de la venta final.
+
+> Problema
+
+Estimar el precio promedio de exportacion por kilo futuro, a partir de la venta de ganado en pie para mercados extranjeros.
+
+> Matriz de valoracion
+
+Para proyectar el precio promedio de exportacion hicimos **ceteris paribus** en el escenario o contexto de mercado, por lo cual trabajaremos con tres supuestos:
+
+-   Uruguay mantiene la cuota de venta de ganado al mercado internacional.
+-   No ocurran muertes en el rebaño por enfermedades extraordinarias o epidemias.
+-   Ganado bovino con las mismas caracteristicas físicas peso, raza, sexo, clase, estado, nutrición, sanidad, homogeneidad, calidad, etc.)
+-   La inversion que tiene en mente el productor es de unos 10.000 dolares.
+-   El valor de rentabilidad por inversion debe ser superior al 8% que ofrece el banco, el productor espera como minimo el doble de la tasa que paga el banco.
+
+Cada kilo de carne en el mercado internacional se vende en 4 dólares en promedio, el costo para producir cada kilo es de 3 dólares(reposición, alimentación y sanidad) por lo que la renta neta mínima esperada después de impuestos es de 1 dólar por kilo, esto es cerca del 25% del valor de produccion, a su vez cada bovino de 3 años pesa en promedio 300 kilos, *para mayor información ver* [Dinámica de los pesos de ganado vacuno de reposición en los remates por pantalla en Uruguay](https://acortar.link/tIW3To).
+
+El valor esperado total de retorno por la inversión por cada punto del precio es de 638 dólares, esto siginifca que cada dólar de venta debe multiplicarse por este precio para calcular el valor final esperado de rentabilidad total por la inversión.
+
+> **Matriz de valoración esperada**
+
+| Año 2023              | Prediccion Python | IMEx real  | Desvio +10% |
+|-----------------------|-------------------|------------|-------------|
+| Valor                 | 3.91413           | 3.800      | 3.832       |
+| Inversion ganado bov  | 2500 U\$D         | 2.427 U\$D | 2.444 U\$D  |
+| Rentabilidad en banco | 800 U\$D          | 800 U\$D   | 800 U\$D    |
+
+: Fuente: Elaboracion propia
+
+### Definición del objetivo
+
+## Objetivo de Machine Learning
+
+1.  Predecir el precio del kilo de carne de exportación para el año 2022-2025.
+
+## Construcción y obtención de datos de fuentes oficiales {.tabset .tabset-pills .smaller}
+
+> Base de datos
+
+-   **Pais**: Uruguay
+
+-   **Periodo**: El dataset esta comprendido por datos de los años que van del 2001 al 2021.
+
+-   **Cantidad de observaciones**: 21
+
+-   **Fuente**:
+
+    *Uruguay XXI*
+
+    *FAO*
+
+    [*https://www.bcu.gub.uy/Estadisticas-e-Indicadores/Paginas/Cotizaciones.aspx*](https://www.bcu.gub.uy/Estadisticas-e-Indicadores/Paginas/Cotizaciones.aspx){.uri}
+
+    [*https://www.inac.uy/innovaportal/v/15205/10/innova.front/relacion-hacienda_exportacion---rhe-bovinos*](https://www.inac.uy/innovaportal/v/15205/10/innova.front/relacion-hacienda_exportacion---rhe-bovinos){.uri}
+
+> Variables explicativas o predictivas
+
+1.  **Año**: año de observación.
+2.  **Demanda total en cantidades de carne vacuna desde China,continental**: Carne, ganado vacuno, fresca o refrigerada, expresada en toneladas.FAO
+3.  **Exportación de carne de Estados Unidos**, expresada en cabezas de ganado vacuno.FAO
+4.  **Ingreso medio de exportacion de carne bovina**. en U\$D por kilo. INAC datos del 2005-2021.
+5.  **Indice de calentamiento año meteorológico**. Variación de temperatura de la superficie terrestre expresado en grados C°. FAO
+6.  **Total de ganado vacuno exportado desde Uruguay**, expresado en cabezas de ganado.FAO
+7.  **Evolución del dólar en Uruguay**. billete dólar para la compra.BCU
+8.  **Exportaciones de ganado vacuno en pie desde Uruguay en miles de dólares**.FAO
+9.  **Exportacion de Carne, vacuno deshuesada, fresca o refrigerada desde Uruguay** expresado en toneladas.FAO
+10. **Exportacion de Carne, vacuno deshuesada, fresca o refrigerada desde Uruguay** expresado en miles de U\$D.FAO
+11. **Variación anual del IMEX bovino**, expresado en porcentaje.elaboracion propia
+
+*En relacion a los datos faltantes para la serie del ingreso promedio de exportacion de carne bovina se usaron tecnicas de distribucion normal inversa con semilla aleatoria para calcular los valores correspondientes a 2001,2002,2003,2004. que representan el 19% de los datos.*
+
+**La variable objetivo es el precio del Ingreso medio de exportacion de carne bovina para el 2.023**. en U\$D.
+
+> Diccionario de Variables
+
++----------------------------------------------------------------------------------------------+--------------------+
+| Variable                                                                                     | Nomeclatura DF     |
++==============================================================================================+====================+
+| **Año**                                                                                      | **Anio**           |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Demanda total en cantidades de carne vacuna desde China**                                  | **Imp_China**      |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Exportación de carne desde Estados Unidos al mundo**                                       | **Export\_ EEUU**  |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Total de ganado vacuno exportado desde Uruguay en cabezas**                                | **Ex_UGY_GV_C**    |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Total de ganado vacuno exportado desde Uruguay en miles de dólares**                       | **Ex_UGY_GV_U\$D** |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Exportacion de Carne, vacuno deshuesada, fresca o refrigerada desde Uruguay** en toneladas | **Ex_UGY_CF_Tn**   |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Exportacion de Carne, vacuno deshuesada, fresca o refrigerada desde Uruguay en dólares**   | **Ex_UGY_CF_U\$D** |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Indice de calentamiento año meteorológico**                                                | **Var_C°**         |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Ingreso medio de exportacion de carne bovina en dólares**                                  | **Imex_Bov**       |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Variación anual del ingreso medio de exportacion de carne bovina en %**                    | **Var_anual_RHE**  |
++----------------------------------------------------------------------------------------------+--------------------+
+| **Evolución del dólar en Uruguay**                                                           | **U\$D/UGY**       |
++----------------------------------------------------------------------------------------------+--------------------+
+
+: Nomeclatura de variables usadas
+
+------------------------------------------------------------------------
+
+> Metrica de evaluacion
+
+RMSE mide la cantidad de errores que existen entre el valor de la prediccion y el valor observado, mientras mas pequeño es este valor mas cercana se encuentra la prediccion de los valores reales.
+
+> Formula de calculo
+
+$$\sqrt[2]{(x^{2}-\overline{x}))}$$
+
+donde yreal es el observado y ypred es el que resulta de la prediccion.
+
+## Exploración y análisis de los datos {.tabset .tabset-pills .smaller}
+
+Para la preparación de los datos usaremos ambos lenguajes de programación R y Python.
+
+Trabajaremos con las librerias:
+
+-   Lenguaje R: skimr, tidyverse, tidymodels, DataExplorer, entre otras.
+-   Python: numpy, pandas, seaborn, sklearn, entre otras.
+
+Cargamos las librerias necesarias para trabajar con ambos lenguajes;
+
+```{r Librerias de R, warning=TRUE}
+library(reticulate) 
+library(readxl)
+library(skimr)
+library(PerformanceAnalytics)
+library(corrplot)
+library(ggplot2)
+library(writexl)
+library(neuralnet)
+library(caret)
+library(nnet)
+```
+
+```{python librerias de python, echo=TRUE, warnings= FALSE}
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import openpyxl
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
+#warnings
+import warnings
+warnings.filterwarnings("ignore")
+
+```
+
+Carga de datos en R
+
+```{r Carga de datos en R}
+dfr <- read_excel("C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/DF.xlsx")
+```
+
+Carga de datos en python
+
+```{python Carga de datos en Python, echo=TRUE}
+
+dfpy = pd.read_excel("C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/DF.xlsx")
+
+```
+
+> Visual del Dataset
+
+```{python Traspuesta del Dataset}
+dfpy.head(5).T
+```
+
+Veamos la información del dataset para analizar un poco mejor.
+
+```{python Informacion del Dataset}
+dfpy.info()
+```
+
+El Dataset se compone de 21 filas y 11 columnas, tenemos 4 variables que son de tipo integer y 7 de tipo float, sin embargo, la variable año si bien esta numérica para el caso en estudio es una variable categórica ordinal por lo que realizaremos esta transformación, el resto de las variables entendemos que tiene el formato adecuado para trabajar.
+
+### Transformación y adecuación del Dataset
+
+Cambiar la variable año a categorica:
+
+```{python Cambio a variable categorica}
+dfpy['Anio'] = pd.Categorical(dfpy['Anio'])
+```
+
+veamos un poco la distribución original de algunas variables, así como los estadísticos de las mismas.
+
+```{r Summary del dataset}
+dfr2 <- py$dfpy
+summary(dfr2) 
+```
+
+De los datos sumarizados se puede deducir:
+
+1.  La participacion durante las dos decadas de EE.UU. en las exportaciones de carne a nivel mundial crecieron un 3.200%.
+2.  La participacion de Uruguay en el mismo periodo crecieron en 3.360%, lo cual es bueno considerando las dimensiones de ambas naciones.
+3.  El dolar en Uruguay se mantuvo estable durante este periodo alcanzando una media de 27.
+4.  Las condiciones climatologicas tambien sufrieron variaciones importantes, pasando de 0,13 grados en el 2001 a 1.54 en el 2021, esto es un crecimiento de 1.184% de incremento.
+
+## Graficas
+
+> Primero observemos la correlacion entre las variables
+
+```{r Multiplot de correlaciones R}
+pairs(dfr2) #aca no podemos apreciar mucho las correlaciones entre variables
+```
+
+Si bien no deja ver todas las correlaciones, se puede observar por ejemplo la alta correlacion positiva que existe entre las exportaciones de Uruguay y las importaciones desde China, pero no de ganado vacuno en pie, sino de las exportaciones de carne Uruguaya en carne vacuno deshuesada, fresca o refrigerada.
+
+```{python Matriz de correlacion con python}
+
+dfpy.corr()
+
+```
+
+```{r subset sin la variable anio}
+dfr3 <- subset(x = dfr2,
+               select = -c(Anio))
+```
+
+```{r grafica de correlacion}
+
+corrplot(cor(dfr3),        
+         method = "circle", 
+         type = "lower",    
+         diag = TRUE,      
+         tl.col = "black", 
+         bg = "white",     
+         title = "Matriz de Correlacion",       
+         col = NULL)       
+```
+
+```{r grafica y valores de correlacion, warning=FALSE}
+chart.Correlation(dfr3, histogram = TRUE, method = "pearson")
+```
+
+De aca podemos sacar algunas conclusiones, la primera es que las variables seleccionadas para explicar el indice promedio de exportacion por carne vacuna aparentan tener relacion con la causalidad de los valores que toma, sin embargo hay que ser cuidadosos, ya que nunca una correlacion positiva o negativa se debe interpretar como causalidad. Partiendo de esta aclaracion hacemos los siguientes apartados:
+
+-   Se observa una asociacion de hecho positiva entre la evolucion del dolar y el incremento en el monto total de exportaciones, lo cual tendria sentido ya que un empresario recibe mayor pago por cada bien o servicio exportado a medida que el dolar sube y la moneda se devalua. esto lo podemos evidenciar por ejemplo en la correlacion de 0,91 que tienen las variables Imex_bov & Ex_UGY_CF_U\$D.
+
+-   Para trabajar en los distintos algoritmos, vamos a excluir a todas las variables con correlacion superior a 0.7 ya que nos es dificil saber cual de las dos esta generando la explicabilidad de la otra.
+
+Calculamos la correlacion las variables con la variable objetivo Imex_bov
+
+```{python columna de correlacion}
+corr_matriz = dfpy.corr()
+dfpycorr = pd.DataFrame(dfpy.corrwith(dfpy['Imex_bov'],axis=0),columns=['Correlacion'])
+```
+
+Observamos cuales son las variables que eliminaremos de nuestro dataset para el entrenamiento de los algoritmos
+
+```{python correlaciones mayores a 0.7}
+
+dfpycorr[abs(dfpycorr['Correlacion']) > 0.7]
+```
+
+Entonces repasando la exploracion de datos tenemos un dataset de 11 columnas, 21 observaciones, sin datos nulos, por lo que ya tendriamos el data set listo para iniciar el entrenamiento. Antes de pasar a los algoritmos observemos la distribucion de nuestra variable objetivo, respecto a las otras
+
+```{r Distribucion de frecuencias de la variable objetivo}
+
+density(dfr3$Imex_bov)
+
+```
+
+```{r Distribucion de frecuencias de Imex bov}
+
+hist(dfr3$Imex_bov)
+
+```
+
+En la grafica observamos que la serie no toma valores de 2.5 en ninguno de los años observados, por otra parte el valor con mayor frecuencia esta entre 3.5 y 4, pero como esta variable es continua no es correcto verlo en un histograma con tanto corte, veamos como se observa en un grafico de densidad.
+
+```{r grafica de densidad, warning=FALSE}
+
+ggplot(dfr3, aes(x = Imex_bov)) + 
+  geom_density(color = 'green', fill = 'yellow', alpha = 0.5)
+
+```
+
+Nos genera una grafica bimodal, con concentracion en los valores 2 y 3.7 aproximadamente en el periodo observado, esto viendo los datos sin la presencia del anio, ya que entre estas dos variables se observa una relacion lineal positiva, como vimos en el plot superior.
+
+## Preparación del Dataset
+
+Los procesos que haremos son:
+
+-   dropear las variables que encontramos con una correlacion por encima de 0.7.
+
+```{python info}
+dfpy.info()
+```
+
+```{python dropeamos las variables para el Dataset}
+
+dfpy2 = dfpy.drop(['Ex_UGY_GV_U$D','Ex_UGY_CF_U$D', 'Anio'], axis=1)
+ 
+```
+
+-   Renombrar las variables que tienen caracteres especiales
+
+```{python renombramos variables}
+
+dfpy2 =  dfpy2.rename(columns={'Var_C' : 'Var_C'})
+dfpy2 =  dfpy2.rename(columns={'U$D/UGY' : 'UD_UGY'})
+dfpy2 =  dfpy2.rename(columns={'Export_ EEUU' : 'Export_EEUU'})
+
+```
+
+-   Pasar a todas las variables de float a numerico
+
+```{python chequeamos }
+
+dfpy2.info()
+```
+
+```{r cambiamos a todas las variables como numeric, warning=FALSE}
+
+dfr4 <- py$dfpy2
+dfr4$Imp_China <- as.numeric(dfr4$Imp_China)
+dfr4$Ex_UGY_CF_Tn <- as.numeric(dfr4$ Ex_UGY_CF_Tn)
+dfr4$Var_C <- as.numeric(dfr4$Var_C)
+dfr4$UD_UGY  <- as.numeric(dfr4$UD_UGY )
+dfr4$Var_anual_Imex_bov  <- as.numeric(dfr4$Var_anual_Imex_bov )
+
+```
+
+-   Estandarizar a todas las variables, para quitar cualquier peso que pueda influir en el entrenamiento y por ende en los resultados finales, para ello crearemos primero la funcion de estandarizado
+
+```{r funcion de estandarizado}
+
+estandarizado <- function(x){
+  resultado <- (x - mean(x))/(sd(x))
+  return(resultado)
+}
+
+```
+
+```{r estandarizamos todo el dataset}
+
+dfr4$Imp_China <- estandarizado(dfr4$Imp_China)
+dfr4$Ex_UGY_CF_Tn <- estandarizado(dfr4$ Ex_UGY_CF_Tn)
+dfr4$Var_C <- estandarizado(dfr4$Var_C)
+dfr4$UD_UGY  <- estandarizado(dfr4$UD_UGY)
+dfr4$Var_anual_Imex_bov  <- estandarizado(dfr4$Var_anual_Imex_bov)
+dfr4$Export_EEUU <- estandarizado(dfr4$Export_EEUU)
+dfr4$Ex_UGY_GV_C  <- estandarizado(dfr4$Ex_UGY_GV_C)
+
+```
+
+> Visual del Dataset estandarizado
+
+```{r print del DF estandarizado}
+print(dfr4)
+```
+
+Exportaremos el Dataset Final para usarlo en el entrenamiento de datos con Python posteriormente
+
+```{r exportar el DF tratado }
+#write_xlsx(dfr4,"C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/DFF.xlsx")
+
+```
+
+## Exploración de algoritmos con Python
+
+Iniciaremos la exploracion de algoritmos con el Dataset que hemos preparado, los algoritmos con los que intentaremos son, LGBM de Microsoft y Random Forest.
+
+```{python Carga del Dataset DFF}
+
+RFO = dfpy
+
+```
+
+Una de las ventajas de Random Forest regresor es que no necesita ajuste en los datos, por lo cual realizaremos pruebas tanto con el Dataset inicial como con el Dataset preparado.
+
+### Random Forest DF original
+
+```{python info de RFO}
+RFO.info()
+```
+
+```{python sample}
+
+RFO.sample(3)
+```
+
+definimos las variables explicativas y la variable objetivo
+
+```{python variables explicativas y objetivo}
+
+X = RFO.drop(['Imex_bov', 'Anio'], axis = 1)
+y = RFO['Imex_bov']
+
+```
+
+Partimos el Dataset de entrenamiento y el de validacion
+
+```{python spliteamos el Dataset}
+
+X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.20)
+
+```
+
+```{python Hacemos un shape}
+X_train.shape
+```
+
+Construimos el modelo
+
+```{python modelo Random Forest}
+
+RF_mod = RandomForestRegressor(
+                  n_estimators = 100,
+                  criterion = 'squared_error',
+                  max_depth = None,
+                  max_features = 5,
+                  oob_score = False,
+                  n_jobs = -1,
+                  random_state = 1234
+                  
+)
+```
+
+Entrenamos al modelo
+
+```{python Ajuste de datos RF}
+
+RF_mod.fit(X_train, y_train)
+
+```
+
+> Sacamos las predicciones
+
+```{python predicciones}
+
+PredictionRF_mod = RF_mod.predict(X = X_test)
+```
+
+> Calculamos el error cuadratico
+
+```{python funcion del error cuadratico}
+
+rmse = mean_squared_error(
+        y_true = y_test,
+        y_pred = PredictionRF_mod,
+        squared = False
+)
+
+```
+
+```{python impresion del error}
+
+print(f'El error rmse de test es: {rmse}')
+```
+
+> Imprimo las predicciones
+
+```{python imprimo las predicciones}
+
+print(PredictionRF_mod)
+```
+
+```{python concateno el dataset con las predicciones}
+
+resultado = X_test.copy(deep=True)
+resultado['pred_RF_py'] = PredictionRF_mod
+resultado['valor_real_test'] = y_test
+resultado.tail()
+
+```
+
+### Light Gradient Boosting DF estandarizado
+
+> Importamos el algoritmo
+
+```{python importamos el algoritmo}
+from lightgbm import LGBMRegressor
+```
+
+Cargamos el Dataset estadandarizado
+
+```{python dataset estandarizado}
+
+dflgbm = pd.read_excel("C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/DF.xlsx")
+```
+
+Visual del dataset estandarizado
+
+```{python visual del dataset estandarizado}
+print(dflgbm)
+```
+
+```{python observamos el dataset}
+
+dflgbm.info()
+```
+
+Hacemos una copia del dataset para iniciar el entrenamiento
+
+```{python copia del dataset}
+LGBM = dflgbm.copy()
+
+```
+
+```{python variables explicativas y objetivo LGBM 1}
+
+XL = LGBM.drop(['Imex_bov', 'Anio', 'Ex_UGY_GV_U$D', 'Ex_UGY_CF_U$D'], axis = 1)
+yL = LGBM['Imex_bov']
+```
+
+Para entrenar a este algoritmo partiremos el dataset de entrenamiento tomando los primeros 17 periodos y reservando los otros 4 para el testeo
+
+```{python ancla 1}
+
+ancla = 4
+
+XL_train,XL_test = XL.iloc[:-ancla, :], XL.iloc[-ancla: , :]
+yL_train,yL_test = yL.iloc[:-ancla], yL.iloc[-ancla:]
+
+```
+
+```{python vemos con la funcion shape}
+XL_train.shape
+```
+
+```{python shape LGBM}
+yL_train.shape
+```
+
+Ahora que ya hemos separado las variables explicativas y la objetivo crearemos el modelo
+
+```{python modelo LGBM}
+
+LGBM_mod = LGBMRegressor()
+LGBM_mod.fit(XL_train, yL_train)
+
+#warnings
+import warnings
+warnings.filterwarnings("ignore")
+
+```
+
+```{python sacamos las predicciones LGBM con estandar}
+
+predic2 = LGBM_mod.predict(XL_test)
+predic2
+
+```
+
+Vamos a escalar las variables, ya que con el Dataset estandarizado no obtuvimos buenos resultados
+
+```{python copiamos el Dataset para iniciar el escalado}
+
+LGBM_escala = LGBM.copy()
+```
+
+```{python informacion }
+LGBM_escala.info()
+```
+
+```{python pasamos a int las variables que se encuentran en float}
+
+LGBM_escala['Imp_China'] = LGBM_escala['Imp_China'].astype(int)
+LGBM_escala['Ex_UGY_CF_Tn'] = LGBM_escala['Ex_UGY_CF_Tn'].astype(int)
+LGBM_escala['Var_C'] = LGBM_escala['Var_C'].astype(int)
+LGBM_escala['U$D/UGY'] = LGBM_escala['U$D/UGY'].astype(int)
+LGBM_escala['Var_anual_Imex_bov'] = LGBM_escala['Var_anual_Imex_bov'].astype(int)
+```
+
+```{python Escalado de variables}
+
+
+LGBM_escala['Imp_China'] = (LGBM_escala['Imp_China'] - min(LGBM_escala['Imp_China']))/(max(LGBM_escala['Imp_China'])- min(LGBM_escala['Imp_China']))
+
+```
+
+```{python iniciamos el escalado de variables}
+
+LGBM_escala['Export_ EEUU'] = (LGBM_escala['Export_ EEUU'] - 
+min(LGBM_escala['Export_ EEUU']))/(max(LGBM_escala['Export_ EEUU'])- 
+min(LGBM_escala['Export_ EEUU']))
+
+LGBM_escala['Ex_UGY_GV_C']=(LGBM_escala['Ex_UGY_GV_C']-min(LGBM_escala['Ex_UGY_GV_C']))/(max(LGBM_escala['Ex_UGY_GV_C'])-min(LGBM_escala['Ex_UGY_GV_C']))
+
+LGBM_escala['Ex_UGY_CF_Tn'] = (LGBM_escala['Ex_UGY_CF_Tn'] - min(LGBM_escala['Ex_UGY_CF_Tn']))/(max(LGBM_escala['Ex_UGY_CF_Tn'])- min(LGBM_escala['Ex_UGY_CF_Tn']))
+
+LGBM_escala['Var_C'] = (LGBM_escala['Var_C'] - min(LGBM_escala['Var_C']))/(max(LGBM_escala['Var_C'])- min(LGBM_escala['Var_C']))
+
+LGBM_escala['U$D/UGY'] = (LGBM_escala['U$D/UGY'] - min(LGBM_escala['U$D/UGY']))/(max(LGBM_escala['U$D/UGY'])- min(LGBM_escala['U$D/UGY']))
+
+LGBM_escala['Var_anual_Imex_bov'] = (LGBM_escala['Var_anual_Imex_bov'] - min(LGBM_escala['Var_anual_Imex_bov']))/(max(LGBM_escala['Var_anual_Imex_bov'])- min(LGBM_escala['Var_anual_Imex_bov']))
+
+```
+
+```{python informacion del nuevo dataset}
+LGBM_escala.info()
+```
+
+Ahora que ya contamos con todas las variables necesarias para entrenar escaladas, intentaremos de nuevo con el modelo
+
+> Seleccionamos nuevamente las variables explicativas y objetivo
+
+```{python variables explicativas y objetivo LGBM}
+
+XL2 = LGBM_escala.drop(['Imex_bov', 'Anio', 'Ex_UGY_GV_U$D', 'Ex_UGY_CF_U$D'], axis = 1)
+yL2 = LGBM_escala['Imex_bov']
+```
+
+Para entrenar a este algoritmo partiremos el dataset de entrenamiento tomando los primeros 17 periodos y reservando los otros 4 para el testeo
+
+```{python ancla }
+
+ancla = 4
+
+XL2_train,XL2_test = XL2.iloc[:-ancla, :], XL2.iloc[-ancla: , :]
+yL2_train,yL2_test = yL2.iloc[:-ancla], yL2.iloc[-ancla:]
+
+```
+
+```{python modelo LGBM 2}
+
+LGBM_mod2 = LGBMRegressor()
+LGBM_mod2.fit(XL2_train, yL2_train)
+
+```
+
+```{python sacamos las predicciones LGBM con escalado}
+
+predic3 = LGBM_mod2.predict(XL2_test)
+predic3
+
+```
+
+```{python verificamos el error de LGBM primera prediccion}
+
+rmse = np.round(mean_squared_error(yL_test, predic2, squared = False), 1)
+print(f'RMSE: {rmse}')
+
+```
+
+```{python verificamos el error de LGBM}
+
+rmse = np.round(mean_squared_error(yL2_test, predic3, squared = False), 1)
+print(f'RMSE: {rmse}')
+
+```
+
+Despues de investigar encontramos que los warning no son un error sino una advertencia de lo pequeño que es el Dataset, por lo tanto el algoritmo no tiene suficiente para aprender, intentamos insertando un parametro min_data=1 pero no funciono, por lo que pasamos a los siguientes algoritmos en R.
+
+## Exploración de algoritmos con R
+
+En el caso de R hemos seleccionado dos algoritmos de redes neuronales, trabajaremos con el dataset estandarizado ya que trabajan mejor con menor ruido o dispersion en los datos
+
+```{r Observamos nuevamente el dataset}
+
+head(dfr4)
+
+```
+
+Como podemos recordar este data set ya se encuentra limpio, por lo que pasaremos de una vez a la seleccion de variables para entrenar
+
+```{r seleccionamos a las variables de entrenamiento}
+
+dfr5 <- subset(x=dfr4,
+               select = c(Imp_China,Export_EEUU,Ex_UGY_GV_C,Ex_UGY_CF_Tn,Var_C,UD_UGY, Imex_bov))
+
+```
+
+```{r spliteamos los datos}
+
+set.seed(123)
+select <- sample(2, nrow(dfr5), replace = TRUE, prob = c(0.8,0.2))
+training <- dfr5[select==1,]
+test <- dfr5[select==2,]
+
+```
+
+### Algoritmo Neuralnet
+
+El numero total de observaciones es de 21, como vimos hemos separado los datos para entrenar con un 80% y el restante para la validacion, esta division la hemos realizado a traves de la funcion sample.
+
+Para la parametrizacion del algoritmo le indicaremos que cree dos capas ocultas con 10 neuronas cada una.
+
+```{r neuralnet}
+
+set.seed(123)
+Neural <- neuralnet(Imex_bov~.,
+                    data = training,
+                    hidden = c(10,10),
+                    linear.output = FALSE,
+                    lifesign = "full",
+                    act.fct = 'tanh',
+                    rep = 1,
+                    algorithm = 'rprop+',
+                    stepmax = 5000)
+
+```
+
+> Visual de la red neuronal obtenida
+
+```{r Red neuronal impresa}
+plot(Neural)
+
+```
+
+<center>
+
+![](C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/Red.png){width="1000"}
+
+</center>
+
+> Comparamos los resultados con lo observado
+
+```{r comparativo de lo observado vs la prediccion de neuralnet}
+head(data.frame(prediccion=Neural$net.result[[1]], verdadero = training$Imex_bov))
+```
+
+Tal como se observa los resultados de la primera red estan aproximados pero lejos de los resultados observados en la realidad, pasaremos al siguiente algoritmo
+
+### Algotirmo NNet 5
+
+Para este algoritmo usaremos otra tecnica en la particion de los datos, igualmente tomaremos el 80% para entrenar y el restante para validar, pero en esta oportunidad lo haremos con la funcion *createDatapartition* de la libreria caret.
+
+```{r dividimos con createDatapartititon}
+
+set.seed(123)
+
+split <- createDataPartition(dfr5$Imex_bov,
+                             p = 0.8,
+                             list = FALSE)
+
+train <- dfr5[split,]
+test2 <- dfr5[-split,]
+print(train)
+
+```
+
+Vamos a construir dos pruebas en la primera intentaremos con 5 neuronas de capa oculta y en la segunda con un numero mayor, ademas le indicaremos que use todas las variables obtenidas en el dataset
+
+```{r}
+
+mod_nnet1 <- nnet(Imex_bov ~ ., data = train, size = 5, maxit = 1000, linout = TRUE)
+
+```
+
+Tal como se observa el algortimo converge en la iteracion numero 50 con un error de 0.000088
+
+> Evaluacion del modelo
+
+crearemos las predicciones
+
+```{r predicciones nnet1}
+
+predict_nnet1<- predict(mod_nnet1, newdata = test2)
+```
+
+```{r}
+rmse1 <- caret::RMSE(predict_nnet1, test2$Imex_bov)
+print(rmse1)
+```
+
+> Comparamos las predicciones nnet1 con lo observado
+
+```{r visual de predicciones nnet1 vs los valores reales}
+
+head(data.frame(predicc=predict_nnet1, verdadero = test2$Imex_bov ))
+
+```
+
+Muy buenos resultados con solo 5 neuronas :)
+
+```{r imprimimos el rmse para nnet1}
+print(paste(' El rrror medio cuadratico es:', rmse1))
+```
+
+Se obtienen muy buenos resultados con este algoritmo, probemos ahora con mas neuronas
+
+### Algoritmo Nnet 50
+
+Le inidicaremos 50 neuronas en las capas ocultas y nuevamente 1000 iteraciones como maximo
+
+```{r}
+
+mod_nnet2 <- nnet(Imex_bov ~., data = train, size = 50, maxit = 1000, linout= TRUE)
+```
+
+Obtenemos un error aun mas bajo con este numero de neuronas, ademas de converger en la iteracion 40.
+
+> Evaluemos este nuevo modelo
+
+```{r predicciones con el nnet2}
+
+predict_nnet2 <- predict(mod_nnet2, newdata = test2)
+
+```
+
+```{r}
+rmse2 <- caret::RMSE(predict_nnet2, test2$Imex_bov)
+```
+
+```{r imprimimos el rmse para nnet2}
+print(paste(' El error medio cuadratico es:', rmse2))
+```
+
+Aumentando el numero de neuronas el algoritmo empeora en la precision de las predicciones y pasa de un error de 0.91 a 1.39
+
+> Comparamos las predicciones nnet1 con lo observado
+
+```{r visual de predicciones nnet2 vs los valores reales}
+
+head(data.frame(predicc2=predict_nnet2, verdadero = test2$Imex_bov ))
+
+```
+
+## Dataset Final
+
+Una vez evaluadas las distintas tecnicas se infiere que los algoritmos mas acertados en cuanto a los valores observados se refiere son nnet con 5 neuronas para el caso de R y Random Forest para el caso de python, construiremos un dataset con los 2 mejores resultados de validacion.
+
+```{r}
+
+#test2$predict_RF <- py$Predic1
+#test2$predict_nnet5 <- predict_nnet1
+
+#print(test2)
+```
+
+### Dataset artificial para las predicciones del 2022-2025
+
+Para sacar las predicciones futuras en el periodo que nos hemos planteado, crearemos un Dataset artificial o sintentico en excel usando la funcion pronostico lineal. Obteniendo como resultado el Dataset que usaremos para proyectar nuestros valores de IMEx en el periodo indicado.
+
+> Visual del Dataset artificial
+
+```{python Cargamos el Dataset artificial}
+Futuro = pd.read_excel("C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/Futuro.xlsx")
+```
+
+```{python visual del Dataset sintetico}
+print(Futuro)
+```
+
+### Predicciones 2022-2025
+
+Ya cargado el dataset crearemos las primeras predicciones para el periodo planteado, para ello debemos tratar de la misma manera cada vez que nos toque cada algoritmo segun su entrenamiento
+
+De los cuatro algoritmos trabajados escogimos RF de python para realizar la prediccion ya que fue el que obtuvo el menor *El error rmse de test es: 0.6492614526521645*
+
+#### Random Forest
+
+Para el caso de este algoritmo no se le realizo ningun tratamiento a los datos, soportandonos en sus bondades para el procesamiento de datos, por lo tanto continuaremos de forma directa con la prediccion
+
+> Extraemos las variables objetivo y año del dataset
+
+```{python variables anio y objetivo RF}
+
+FuturoRF = Futuro.drop(['Imex_bov', 'Anio'], axis = 1)
+
+```
+
+```{python Predicciones con Random Forest}
+
+Predic1 = RF_mod.predict(X = FuturoRF)
+
+```
+
+```{python imprimimos las predicciones}
+
+print(Predic1)
+
+```
+
+Finalmente insertaremos la prediccion en el dataset artificial
+
+```{python Dataset final}
+
+Final = Futuro.copy(deep=True)
+Final['predic_RF'] = Predic1
+Final
+
+```
+
+Exportamos el Dataset con todas las predicciones
+
+```{python exportar el dataset final}
+#Final.to_excel('Predicciones_Imex.xlsx', sheet_name='Predicciones')
+```
+
+------------------------------------------------------------------------
+
+### Interpretacion y Conclusiones
+
+El modelo seleccionado fue el construido en Python con Random Forest, este algoritmo mostro el menor error cuadratico, por lo cual se acerco mejor a los valores reales del ingreso medio por kilo de exportacion bovina, la tolerancia en cuanto al error prevista es de hasta +/- 10%, el desvio obtenido fue de +7.01% esto significa que le comunicamos al productor un precio para el cierre del 2.023 de 4.07 U\$D por kilo, y el precio real registrado fue de 3.80, esto significa que obtuvo 542 dolares menos de lo esperado.
+
+> **Matriz de valoración 2.023**
+
+| Año 2023              | Prediccion Python | IMEx real  |
+|-----------------------|-------------------|------------|
+| Valor                 | 4.07              | 3.800      |
+| Inversión ganado bov  | 2602 U\$D         | 2.060 U\$D |
+| Rentabilidad en banco | 800 U\$D          | 800 U\$D   |
+
+: Fuente: Elaboracion propia
+
+A pesar de obtener menos rentabilidad de la esperada, esta es mayor a la que podria obtener respecto a la inversion en un instrumento de plazo fijo en la banca privada.
+
+
+
+
+### Presentacion de resultados finales
+
+Visual de las predicciones finales obtenidas para el periodo consultado
+
+
+```{python tabla final de predicciones}
+Final[['Anio','predic_RF']]
+```
+
+
+```{r}
+#dfr4 dataset de R
+#"C:/Users/maria/OneDrive/Escritorio/Sourceowm/Capacitaciones/DDS/Proyecto/Proyecto/DFF.xlsx" 
+```
